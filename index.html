@@ -1,27 +1,84 @@
 <!DOCTYPE html>
-<html>
+<html lang='en'>
   <head>
+    
+    <!-- <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewpoint" content="width=device-width, initial-scale=1">
+    <meta name="description" content="Display tweets from data.generator.js">
+    <meta name="author" content="JakeHsiao"> -->
+
     <script src="jquery.js"></script>
     <script src="data_generator.js"></script>
+    <script src="jquery.timeago.js" type="text/javascript"></script>
+    
+
+    <title>Twittler</title>
+    <link rel="stylesheet" href="stylesheet.css">
+
   </head>
   <body>
+
+    <div class="title">Twittler</div>
+    <div class="author">
+      by 
+      <a href="https://github.com/jakehsiao0909">Jake Hsiao</a>
+    </div>
+    <div class="refreshKey">New Feed</div>
+    <div class="tweet-layout"></div>
+    <div class="credit">Twittler Clone for <a href="https://www.hackreactor.com/">Hack Reactor</a> 2018</div>
+
     <script>
 
-      $(document).ready(function(){
-        var $body = $('body');
-        $body.html('');
+    var twittler = function() {
+    var displayTweets = function(tweets) {
+      var newTweets = $('.tweet-layout');
+      newTweets.html('');
 
-        var index = streams.home.length - 1;
-        while(index >= 0){
-          var tweet = streams.home[index];
-          var $tweet = $('<div></div>');
-          $tweet.text('@' + tweet.user + ': ' + tweet.message);
-          $tweet.appendTo($body);
-          index -= 1;
-        }
+      var index = tweets.length - 1;
+      var tweetsCount = 0;
+      while (index >= 0 && tweetsCount < 100) {
+        var tweet = tweets[index];
+        var $tweet = $('<div class="tweet"><span class="user"></span><span class="message"></span></div>');
+        $tweet.children('.user').text('@'+tweet.user);
+        $tweet.children('.message').text(': '+tweet.message);
+        $tweet.appendTo(newTweets);
 
-      });
+        var $time = $('<div class="time"></div>');
+        $time.text($.timeago(tweet.created_at));
+        $time.appendTo(newTweets);
+
+        index -= 1;
+        tweetsCount++;
+      }
+    };
+
+    var refresh = function() {
+      $('.refreshKey').text('New Tweets');
+      displayTweets(streams.home);
+    };
+
+    var userTweets = function(user) {
+      $('.refreshKey').text('User Tweets');
+      displayTweets(streams.users[user]);
+    };
+
+    return {
+      refresh: refresh,
+      userTweets: userTweets
+    };
+}();
+
+$(document).ready(function(){
+    twittler.refresh();
+    $('.refreshKey').on('click', twittler.refresh);
+    $('.tweet-layout').on('click', '.tweet .user', function(event) {
+      var user = $(this).text().slice(1);
+      twittler.userTweets(user);
+    });
+  });
 
     </script>
+     
   </body>
 </html>
